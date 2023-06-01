@@ -1,0 +1,73 @@
+version: "3.6"
+
+services:
+
+  ovs-vswitchd:
+    command:
+      - "ovs-vswitchd"
+    container_name: "ovs-vswitchd"
+    entrypoint:
+      - "start-ovs"
+    environment:
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    hostname: "e671dd21b1ad"
+    image: "openvswitch/ovs:2.11.2_debian"
+    ipc: "private"
+    logging:
+      driver: "json-file"
+      options: {}
+    networks:
+      - "ovs-network2"
+      - "ovs-network1"
+      - "ovs-comm"
+    privileged: yes
+    security_opt:
+      - "label=disable"
+    stdin_open: yes
+    tty: yes
+    volumes:
+      - "4fd3002d733076a9fe31a1f77c5c6475cd3a4af99aa5beec1f683b0d7219bdaa:/var/lib/openvswitch"
+      - "1e37eb71a67750c47c05d8fd7a5f98f2aeb950908a9c7927dbf70c0511380b89:/var/log/openvswitch"
+      - "4c7b30089d5edd5c61add3b25e8646d8dc68223c7c03a9a2959c90923645adc2:/var/run/openvswitch"
+      - "8ef7bf5d27eb82d34e747bd73a0d14be126086b1b394a1d8f394825fd4bb2221:/etc/openvswitch"
+    volumes_from:
+      - "ovsdb-server"
+
+  ovsdb-server:
+    command:
+      - "ovsdb-server"
+    container_name: "ovsdb-server"
+    entrypoint:
+      - "start-ovs"
+    environment:
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    hostname: "047e9aad9eb5"
+    image: "openvswitch/ovs:2.11.2_debian"
+    ipc: "private"
+    logging:
+      driver: "json-file"
+      options: {}
+    networks:
+      - "ovs-comm"
+    stdin_open: yes
+    tty: yes
+    volumes:
+      - "4fd3002d733076a9fe31a1f77c5c6475cd3a4af99aa5beec1f683b0d7219bdaa:/var/lib/openvswitch"
+      - "1e37eb71a67750c47c05d8fd7a5f98f2aeb950908a9c7927dbf70c0511380b89:/var/log/openvswitch"
+      - "4c7b30089d5edd5c61add3b25e8646d8dc68223c7c03a9a2959c90923645adc2:/var/run/openvswitch"
+      - "8ef7bf5d27eb82d34e747bd73a0d14be126086b1b394a1d8f394825fd4bb2221:/etc/openvswitch"
+
+networks:
+  ovs-comm:
+  ovs-network1:
+  ovs-network2:
+
+volumes:
+  1e37eb71a67750c47c05d8fd7a5f98f2aeb950908a9c7927dbf70c0511380b89:
+    external: true
+  4c7b30089d5edd5c61add3b25e8646d8dc68223c7c03a9a2959c90923645adc2:
+    external: true
+  4fd3002d733076a9fe31a1f77c5c6475cd3a4af99aa5beec1f683b0d7219bdaa:
+    external: true
+  8ef7bf5d27eb82d34e747bd73a0d14be126086b1b394a1d8f394825fd4bb2221:
+    external: true
