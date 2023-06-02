@@ -33,6 +33,7 @@ services:
       - label=disable
     privileged: true
     image: shivarammysore/ovs:latest
+    command: ovs-vswitchd
 
   ubuntu1:
     container_name: ubuntu1
