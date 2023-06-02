@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  ovsdb-server:
+    container_name: ovsdb-server
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    network_mode: host
+    volumes:
+      - /lib/modules:/lib/modules
+      - /home/core/ovs/log:/var/log/openvswitch
+      - /home/core/ovs/var/lib/openvswitch:/var/lib/openvswitch
+      - /home/core/ovs/var/run/openvswitch:/var/run/openvswitch
+      - /home/core/ovs/etc/openvswitch:/etc/openvswitch
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovsdb-server
+
+  ovs-vswitchd:
+    container_name: ovs-vswitchd
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    network_mode: host
+    volumes_from:
+      - ovsdb-server
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovs-vswitchd
