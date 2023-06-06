@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  ovsdb-server:
+    container_name: ovsdb-server
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    networks:
+      - ovscomm
+    volumes:
+      - /lib/modules:/lib/modules
+      - /home/core/ovs/log:/var/log/openvswitch
+      - /home/core/ovs/var/lib/openvswitch:/var/lib/openvswitch
+      - /home/core/ovs/var/run/openvswitch:/var/run/openvswitch
+      - /home/core/ovs/etc/openvswitch:/etc/openvswitch
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovsdb-server
+
+  ovs-vswitchd:
+    container_name: ovs-vswitchd
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    networks:
+      - ovscomm
+      - network1
+      - network2
+    volumes_from:
+      - ovsdb-server
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovs-vswitchd
+
+  ubuntu1:
+    container_name: ubuntu1
+    image: ubuntu
+    networks:
+      network1:
+        aliases:
+          - network1
+    command: tail -f /dev/null
+
+  ubuntu2:
+    container_name: ubuntu2
+    image: ubuntu
+    networks:
+      network2:
+        aliases:
+          - network2
+    command: tail -f /dev/null
+
+  ryu:
+    container_name: ryu
+    image: osrg/ryu
+    networks:
+      - ovscomm
+    tty: true
+    stdin_open: true
+    command: /bin/bash
+
+networks:
+  ovscomm:
+  network1:
+  network2:
+
