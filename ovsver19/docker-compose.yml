@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  ovsdb-server:
+    hostname: ovs-server
+    container_name: ovsdb-server
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    networks:
+      - ovscomm
+    volumes:
+      - /lib/modules:/lib/modules
+      - /home/core/ovs/log:/var/log/openvswitch
+      - /home/core/ovs/var/lib/openvswitch:/var/lib/openvswitch
+      - /home/core/ovs/var/run/openvswitch:/var/run/openvswitch
+      - /home/core/ovs/etc/openvswitch:/etc/openvswitch
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovsdb-server
+
+  ovs-vswitchd:
+    hostname: ovs
+    container_name: ovs-vswitchd
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+      - SYS_NICE
+    networks:
+      - ovscomm
+    volumes_from:
+      - ovsdb-server
+    security_opt:
+      - label=disable
+    privileged: true
+    image: shivarammysore/ovs:latest
+    command: ovs-vswitchd
+
+  ubuntu1:
+    hostname: host1
+    container_name: ubuntu1
+    image: ubuntu
+    links:
+      - ovs-vswitchd
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    command: bash -c "apt-get update && apt-get install -y net-tools && apt-get install -y iputils-ping && apt-get install -y iproute2 && tail -f /dev/null"
+
+  ubuntu2:
+    hostname: host2
+    container_name: ubuntu2
+    image: ubuntu
+    links:
+      - ovs-vswitchd
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    command: bash -c "apt-get update && apt-get install -y net-tools && apt-get install -y iputils-ping && apt-get install -y iproute2 && tail -f /dev/null"
+
+networks:
+  ovscomm:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
